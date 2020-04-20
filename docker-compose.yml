@@ -1,0 +1,35 @@
+version: '3.3'
+
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+        FLASK_ENV: development
+    depends_on:
+        - mongodb
+#  web:
+#    build:
+#      context: .
+#      args:
+#        requirements: ./requirements.txt
+#    image: web-image
+#    ports:
+#    - "5000:5000"
+#    entrypoint: python ./covidapi/main.py
+#    deploy:
+#      restart_policy:
+#        condition: on-failure
+#    depends_on:
+#    - mongo
+
+  mongodb:
+    image: mongo:4.2-bionic
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongovolume:/data/db
