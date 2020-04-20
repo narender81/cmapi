@@ -19,13 +19,14 @@ def add_centre():
     # validate the received values
     if _address and _latitude and _longitude and request.method == 'POST':
         # save details
-        id = mongo.db.centre.insert(
-                    {'address': _address,
-                     'latitude': _latitude,
-                     'longitude': _longitude
+        result = mongo.db.centre.insert_one(
+                    {
+                        'address': _address,
+                        'latitude': _latitude,
+                        'longitude': _longitude
                      }
         )
-        resp = jsonify('Centre added successfully!')
+        resp = jsonify({'id': str(result.inserted_id)})
         resp.status_code = 200
         return resp
     else:

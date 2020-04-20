@@ -21,15 +21,16 @@ def add_collections():
     # validate the received values
     if _donationid and _volunteerid and request.method == 'POST':
         # save details
-        id = mongo.db.collection.insert(
-                    {'donation_id': _donationid,
-                     'volunteer_id': _volunteerid,
-                     'centreid': _centreid,
-                     'status': Status.ACCEPTED,
-                     'collectiondate': datetime.now(pytz.timezone('Asia/Kolkata'))
+        result = mongo.db.collection.insert_one(
+                    {
+                        'donation_id': _donationid,
+                        'volunteer_id': _volunteerid,
+                        'centreid': _centreid,
+                        'status': Status.ACCEPTED,
+                        'collectiondate': datetime.now(pytz.timezone('Asia/Kolkata')),
                      }
         )
-        resp = jsonify('Collection added successfully!')
+        resp = jsonify({'id': str(result.inserted_id)})
         resp.status_code = 200
         return resp
     else:
@@ -62,9 +63,18 @@ def update_collection():
     # validate the received values
     if _donationid and _volunteerid and request.method == 'PUT':
         # save edits
+        _delivered_date = datetime.now(pytz.timezone('Asia/Kolkata')) if Status.DELIVERED==_status else None
         mongo.db.collection.update_one(
-            {'_id': ObjectId(_donationid['$oid']) if '$oid' in _donationid else ObjectId(_donationid)},
-            {'$set': {'status': _status}}
+            {
+                '_id': ObjectId(_donationid['$oid']) if '$oid' in _donationid else ObjectId(_donationid)
+            },
+            {
+                '$set':
+                    {
+                        'status': _status,
+                        'delivered_date': _delivered_date
+                    }
+            }
         )
         resp = jsonify('Collection updated successfully!')
         resp.status_code = 200

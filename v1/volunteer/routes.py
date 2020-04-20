@@ -22,8 +22,15 @@ def add_volunteer():
         # do not save password as a plain text
         _hashed_password = generate_password_hash(_password)
         # save details
-        id = mongo.db.volunteer.insert({'mobile': _mobile, 'name': _name, 'email': _email, 'pwd': _hashed_password})
-        resp = jsonify('Volunteer added successfully!')
+        result = mongo.db.volunteer.insert_one(
+            {
+                'mobile': _mobile,
+                'name': _name,
+                'email': _email,
+                'pwd': _hashed_password
+            }
+        )
+        resp = jsonify({'id': str(result.inserted_id)})
         resp.status_code = 200
         return resp
     else:
@@ -58,8 +65,19 @@ def update_volunteer():
         # do not save password as a plain text
         _hashed_password = generate_password_hash(_password)
         # save edits
-        mongo.db.volunteer.update_one({'_mobile': _mobile},
-                                 {'$set': {'name': _name, 'email': _email, 'pwd': _hashed_password}})
+        mongo.db.volunteer.update_one(
+            {
+                '_mobile': _mobile
+            },
+            {
+                '$set':
+                    {
+                        'name': _name,
+                        'email': _email,
+                        'pwd': _hashed_password
+                    }
+            }
+        )
         resp = jsonify('volunteer updated successfully!')
         resp.status_code = 200
         return resp

@@ -17,8 +17,13 @@ def add_volunteer():
     # validate the received values
     if _name and request.method == 'POST':
         # save details
-        id = mongo.db.items.insert({'name': _name, 'desc': _desc})
-        resp = jsonify('Item added successfully!')
+        result = mongo.db.items.insert_one(
+            {
+                'name': _name,
+                'desc': _desc
+            }
+        )
+        resp = jsonify({'id': str(result.inserted_id)})
         resp.status_code = 200
         return resp
     else:
@@ -49,8 +54,17 @@ def update_item():
     # validate the received values
     if _name and request.method == 'PUT':
         # save edits
-        mongo.db.items.update_one({'_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)},
-                                      {'$set': {'name': _name}})
+        mongo.db.items.update_one(
+            {
+                '_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)
+            },
+            {
+                '$set':
+                    {
+                        'name': _name
+                    }
+            }
+        )
         resp = jsonify('Item updated successfully!')
         resp.status_code = 200
         return resp

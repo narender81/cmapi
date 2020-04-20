@@ -3,7 +3,6 @@ from bson.objectid import ObjectId
 from flask import jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Blueprint
-
 from v1.config.db_config import mongo
 
 donorapi = Blueprint('donorapi', __name__)
@@ -21,8 +20,15 @@ def add_donor():
         # do not save password as a plain text
         _hashed_password = generate_password_hash(_password)
         # save details
-        id = mongo.db.donor.insert({'mobile': _mobile, 'name': _name, 'email': _email, 'pwd': _hashed_password})
-        resp = jsonify('Donor added successfully!')
+        result = mongo.db.donor.insert_one(
+            {
+                'mobile': _mobile,
+                'name': _name,
+                'email': _email,
+                'pwd': _hashed_password
+            }
+        )
+        resp = jsonify({'id':str(result.inserted_id)})
         resp.status_code = 200
         return resp
     else:
@@ -63,8 +69,19 @@ def update_donor():
         # do not save password as a plain text
         _hashed_password = generate_password_hash(_password)
         # save edits
-        mongo.db.donor.update_one({'_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)},
-                                  {'$set': {'name': _name, 'email': _email, 'pwd': _hashed_password}})
+        mongo.db.donor.update_one(
+            {
+                '_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)
+            },
+            {
+                '$set':
+                    {
+                        'name': _name,
+                        'email': _email,
+                        'pwd': _hashed_password
+                    }
+            }
+        )
         resp = jsonify('Donor updated successfully!')
         resp.status_code = 200
         return resp

@@ -33,10 +33,14 @@ def add_donation():
     # validate the received values
     if _donor and len(_items) and request.method == 'POST':
         # save details
-        id = mongo.db.donations.insert({'donorid': _donor,
-                                        'items': _items,
-                                        'status': Status.READY})
-        resp = jsonify('Donation added successfully!')
+        result = mongo.db.donations.insert_one(
+            {
+                'donorid': _donor,
+                'items': _items,
+                'status': Status.READY
+            }
+        )
+        resp = jsonify({'id': str(result.inserted_id)})
         resp.status_code = 200
         return resp
     else:
@@ -77,11 +81,17 @@ def update_donation():
     # validate the received values
     if _id and _donor and len(_items) and request.method == 'PUT':
         # save edits
-        mongo.db.donations.update_one({'_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)},
-                                 {'$set': {'items': _items,
-                                           'status': _status
-                                           }
-                                  }
+        mongo.db.donations.update_one(
+            {
+                '_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)
+            },
+            {
+                '$set':
+                    {
+                        'items': _items,
+                        'status': _status
+                    }
+            }
         )
         resp = jsonify('Donation updated successfully!')
         resp.status_code = 200
