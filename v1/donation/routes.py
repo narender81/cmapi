@@ -42,7 +42,7 @@ def add_donation():
                 'donor_mobile':_donormobile,
                 'items': _items,
                 'safety_confirmation': _safetyconfirm,
-                'status': Status.READY
+                'status': 1
             }
         )
         resp = jsonify({'id': str(result.inserted_id)})
@@ -55,10 +55,10 @@ def add_donation():
 @donationapi.route('/list')
 def donations():
     donations_list = mongo.db.donations.find()
-    donations = []
-    for donation in donations_list:
-        donations.append(donation_details(donation))
-    resp = dumps(donations)
+    # donations = []
+    # for donation in donations_list:
+    #     donations.append(donation_details(donation))
+    resp = dumps(donations_list)
     return resp
 
 
@@ -80,6 +80,13 @@ def get_donation_by_donor_mobile():
 def get_donation_info(id):
     donation = mongo.db.donations.find_one(({'_id': ObjectId(id)}))
     resp = dumps(donation_details(donation))
+    return resp
+
+@donationapi.route('/details/')
+def get_donation_info_by_status():
+    status = request.args.get('status')
+    donation = mongo.db.donations.find(({'status': status}))
+    resp = dumps(donation)
     return resp
 
 

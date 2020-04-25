@@ -47,6 +47,13 @@ def collections_list():
     resp = dumps(coll_list)
     return resp
 
+@collectionapi.route('/list', methods=['GET'])
+def collections_list_for_volunteer():
+    volunteer_mobile = request.args.get('vmobile', None)
+    coll_list = mongo.db.collection.find({'volunteer_mobile': volunteer_mobile})
+    resp = dumps(coll_list)
+    return resp
+
 
 @collectionapi.route('/<donatonid>', methods=['GET'])
 def get_collection_info(donationid):
