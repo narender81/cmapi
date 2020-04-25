@@ -5,6 +5,7 @@ from v1.volunteer.routes import volunteerapi
 from v1.items.routes import itemapi
 from v1.collection.routes import collectionapi
 from v1.centre.routes import centreapi
+from v1.config.db_config import create_or_update_db
 
 app.register_blueprint(donorapi, url_prefix='/api/v1/donor')
 app.register_blueprint(donationapi, url_prefix='/api/v1/donation')
@@ -14,6 +15,8 @@ app.register_blueprint(collectionapi, url_prefix='/api/v1/collection')
 app.register_blueprint(centreapi, url_prefix='/api/v1/centre')
 
 
+
 if __name__ == "__main__":
+    create_or_update_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
 

@@ -10,7 +10,7 @@ __py
 .idea
 /.idea
 .idea/
-
+.__pycache__/
 # C extensions
 *.so
 

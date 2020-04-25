@@ -13,6 +13,7 @@
 from flask_pymongo import PyMongo
 from v1 import app
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+from pymongo import MongoClient, ASCENDING, DESCENDING
 
 
 try:
@@ -27,3 +28,11 @@ except ServerSelectionTimeoutError as timeoutErr:
 except Exception as err:
     print ("Error: {0}".format(err.args))
 
+
+def create_or_update_db():
+    resp=mongo.db.donor.ensure_index([("mobile", ASCENDING), ("email", DESCENDING)], unique=True)
+    print('donor index {}'.format(resp))
+    resp=mongo.db.volunteer.create_index([("mobile", ASCENDING), ("email", DESCENDING)], unique=True)
+    print('Volunteer index {}'.format(resp))
+    resp=mongo.db.items.create_index([("name", ASCENDING)], unique=True)
+    print('Items index {}'.format(resp))

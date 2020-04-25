@@ -4,33 +4,56 @@ from flask import jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Blueprint
 from v1.config.db_config import mongo
+from pymongo.errors import DuplicateKeyError
 
 donorapi = Blueprint('donorapi', __name__)
 
 
 @donorapi.route('/add', methods=['POST'])
 def add_donor():
+
     _json = request.json
-    _name = _json['name']
+    _fname = _json['fname']
+    _lname = _json['lname']
     _email = _json['email']
-    _password = _json['pwd']
+    _address = _json['address']
+    _latitude = _json['lat']
+    _longitude = _json['lng']
     _mobile = _json['mobile']
+    _paddr = _json['paddress']
+    _plat = _json['plat']
+    _plng = _json['plng']
+    _prefmode = _json['prefmode']
+    _ver = _json['verified']
     # validate the received values
-    if _name and _email and _password and request.method == 'POST':
+    if _fname and _mobile and _email and request.method == 'POST':
         # do not save password as a plain text
-        _hashed_password = generate_password_hash(_password)
+        # _hashed_password = generate_password_hash(_password)
         # save details
-        result = mongo.db.donor.insert_one(
-            {
-                'mobile': _mobile,
-                'name': _name,
-                'email': _email,
-                'pwd': _hashed_password
-            }
-        )
-        resp = jsonify({'id':str(result.inserted_id)})
-        resp.status_code = 200
+        try:
+            result = mongo.db.donor.insert_one(
+                {
+                    'mobile': _mobile,
+                    'first_name': _fname,
+                    'last_name': _lname,
+                    'address': _address,
+                    'latitude': _latitude,
+                    'longitude': _longitude,
+                    'email': _email,
+                    'pickup_address': _paddr,
+                    'pickup_addr_latitude': _plat,
+                    'pickup_addr_longitude': _plng,
+                    'pref_mode_of_contact': _prefmode,
+                    'verified': _ver,
+                }
+            )
+            resp = jsonify({'id':str(result.inserted_id)})
+            resp.status_code = 200
+        except DuplicateKeyError:
+            resp = jsonify(' Donor {} already exists'.format(_fname))
+            resp.status_code = 409
         return resp
+
     else:
         return not_found()
 
@@ -41,11 +64,14 @@ def donors():
     resp = dumps(donor_list)
     return resp
 
-
 @donorapi.route('/', methods=['GET'])
-def get_donor_with_mobile():
-    mobile = request.args.get('mobile')
-    donor = mongo.db.donor.find_one({'mobile': int(mobile)})
+def get_donor_using_mobile_or_email():
+    mobile = request.args.get('mobile', None)
+    email = request.args.get('email', None)
+    if mobile:
+        donor = mongo.db.donor.find_one({'mobile': int(mobile)})
+    elif email:
+        donor = mongo.db.donor.find_one({'email': email})
     resp = dumps(donor)
     return resp
 
@@ -59,26 +85,41 @@ def get_donor_info(id):
 @donorapi.route('/update', methods=['PUT'])
 def update_donor():
     _json = request.json
-    _name = _json['name']
-    _id = _json['_id']
+    _fname = _json['fname']
+    _lname = _json['lname']
     _email = _json['email']
-    _password = _json['pwd']
+    _address = _json['address']
+    _latitude = _json['lat']
+    _longitude = _json['lng']
     _mobile = _json['mobile']
+    _paddr = _json['paddress']
+    _plat = _json['plat']
+    _plng = _json['plng']
+    _prefmode = _json['prefmode']
+    _ver = _json['verified']
     # validate the received values
-    if _name and _mobile and request.method == 'PUT':
+    if _fname and _mobile and request.method == 'PUT':
         # do not save password as a plain text
         _hashed_password = generate_password_hash(_password)
         # save edits
         mongo.db.donor.update_one(
             {
-                '_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)
+                'mobile': _mobile
             },
             {
                 '$set':
                     {
-                        'name': _name,
+                        'first_name': _fname,
+                        'last_name': _lname,
+                        'address': _address,
+                        'latitude': _latitude,
+                        'longitude': _longitude,
                         'email': _email,
-                        'pwd': _hashed_password
+                        'pickup_address': _paddr,
+                        'pickup_addr_latitude': _plat,
+                        'pickup_addr_longitude': _plng,
+                        'pref_mode_of_contact': _prefmode,
+                        'verified': _ver,
                     }
             }
         )

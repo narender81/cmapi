@@ -19,7 +19,8 @@ def donation_details(donation):
         '_id': donation['_id'],
         'donor_name': donor['name'],
         'items': items_donated,
-        'status': donation['status']
+        'status': donation['status'],
+        'donor_mobile': donation['donor_mobile']
     }
     return don_det
 
@@ -29,6 +30,8 @@ def add_donation():
     _json = request.json
     _donor = _json['donorid']
     _items = _json['items']
+    _donormobile = _json['donor_mobile']
+    _safetyconfirm = _json['safety_confirmation']
 
     # validate the received values
     if _donor and len(_items) and request.method == 'POST':
@@ -36,7 +39,9 @@ def add_donation():
         result = mongo.db.donations.insert_one(
             {
                 'donorid': _donor,
+                'donor_mobile':_donormobile,
                 'items': _items,
+                'safety_confirmation': _safetyconfirm,
                 'status': Status.READY
             }
         )
@@ -63,6 +68,14 @@ def get_donation(id):
     resp = dumps(donation)
     return resp
 
+
+@donationapi.route('/')
+def get_donation_by_donor_mobile():
+    mobile = request.args.get('mobile', None)
+    donation = mongo.db.donations.find_one(({'donor_mobile': int(mobile)}))
+    resp = dumps(donation)
+    return resp
+
 @donationapi.route('/details/<id>')
 def get_donation_info(id):
     donation = mongo.db.donations.find_one(({'_id': ObjectId(id)}))
@@ -76,6 +89,7 @@ def update_donation():
     _id = _json['donation_id']
     _donor = _json['donorid']
     _items = _json['items']
+    _donormobile = _json['donor_mobile']
     _status = _json['status']
 
     # validate the received values
@@ -83,7 +97,8 @@ def update_donation():
         # save edits
         mongo.db.donations.update_one(
             {
-                '_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)
+                '_id': ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id),
+                'donor_mobile': _donormobile
             },
             {
                 '$set':
@@ -102,6 +117,14 @@ def update_donation():
 @donationapi.route('/delete/<id>', methods=['DELETE'])
 def delete_donation(id):
     mongo.db.donations.delete_one({'_id': ObjectId(id)})
+    resp = jsonify('Donation deleted successfully!')
+    resp.status_code = 200
+    return resp
+
+@donationapi.route('/delete', methods=['DELETE'])
+def delete_donation_using_donor_mobile():
+    mobile = request.args.get('donor_mobile',None)
+    mongo.db.donations.delete({'donor_mobile': mobile})
     resp = jsonify('Donation deleted successfully!')
     resp.status_code = 200
     return resp

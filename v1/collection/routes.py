@@ -15,7 +15,9 @@ collectionapi = Blueprint('collectionapi', __name__)
 def add_collections():
     _json = request.json
     _donationid = _json['donation_id']
+    _donormobile = _json['donor_mobile']
     _volunteerid = _json['volunteer_id']
+    _volunteermobile = _json['volunteer_mobile']
     _centreid = _json['_centreid']
 
     # validate the received values
@@ -24,7 +26,9 @@ def add_collections():
         result = mongo.db.collection.insert_one(
                     {
                         'donation_id': _donationid,
+                        'donor_mobile': _donormobile,
                         'volunteer_id': _volunteerid,
+                        'volunteer_mobile': _volunteermobile,
                         'centreid': _centreid,
                         'status': Status.ACCEPTED,
                         'collectiondate': datetime.now(pytz.timezone('Asia/Kolkata')),
@@ -44,9 +48,9 @@ def collections_list():
     return resp
 
 
-@collectionapi.route('/<id>', methods=['GET'])
-def get_collection_info(id):
-    centre = mongo.db.collection.find_one({'_id': ObjectId(id)})
+@collectionapi.route('/<donatonid>', methods=['GET'])
+def get_collection_info(donationid):
+    centre = mongo.db.collection.find_one({'donation_id': donationid})
     resp = dumps(centre)
     return resp
 
@@ -56,7 +60,9 @@ def update_collection():
     _json = request.json
     _id = _json['_id']
     _donationid = _json['donation_id']
+    _donormobile = _json['donor_mobile']
     _volunteerid = _json['volunteer_id']
+    _volunteermobile = _json['volunteer_mobile']
     _centreid = _json['centreid']
     _status = _json['status']
 
@@ -66,11 +72,13 @@ def update_collection():
         _delivered_date = datetime.now(pytz.timezone('Asia/Kolkata')) if Status.DELIVERED==_status else None
         mongo.db.collection.update_one(
             {
-                '_id': ObjectId(_donationid['$oid']) if '$oid' in _donationid else ObjectId(_donationid)
+                #'_id': ObjectId(_donationid['$oid']) if '$oid' in _donationid else ObjectId(_donationid)
+                'donation_id': _donationid
             },
             {
                 '$set':
                     {
+                        'volunteer_mobile': _volunteermobile,
                         'status': _status,
                         'delivered_date': _delivered_date
                     }

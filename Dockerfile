@@ -1,11 +1,11 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 WORKDIR /app
-ENV FLASK_APP app.py
-ENV FLASK_RUN_HOST 0.0.0.0
+COPY . .
+CMD source ./venv/bin/activate
 RUN apk add --no-cache gcc musl-dev linux-headers
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-COPY . .
-CMD ["flask", "run"]
+
+CMD python3 app.py
 
 
