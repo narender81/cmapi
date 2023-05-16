@@ -1,4 +1,4 @@
-# covidapi
+# cmapi
 
 # docker commands
 
@@ -17,7 +17,7 @@ docker ps
 
 Narenders-MacBook-Pro:covidapi nbongoni$ docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                      NAMES
-a9b87d836c16        covidapi_web        "flask run"              4 seconds ago       Up 3 seconds        0.0.0.0:5000->5000/tcp     covidapi_web_1
+a9b87d836c16        cmapi_web        "flask run"              4 seconds ago       Up 3 seconds        0.0.0.0:5000->5000/tcp     covidapi_web_1
 54fedb4f2227        mongo:4.2-bionic    "docker-entrypoint.s…"   5 seconds ago       Up 3 seconds        0.0.0.0:27017->27017/tcp   covidapi_mongodb_1
 
 
